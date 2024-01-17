@@ -110,7 +110,7 @@ export const signout:RequestHandler = (req, res, next) => {
       next(err) ;
   }
 };
-
+//send money to other users
 export const sendMoney:RequestHandler = async(req, res, next) => {
   try{
     const senderId = req.params.id;
@@ -173,8 +173,72 @@ res.status(200).json({ok:true,message:"money sent successfully"}) ;
   }catch(error){
     res.status(407).json({ message: error });
   }
-
-
-
-
 };
+
+//receive money from other users
+
+export const receiveMoney:RequestHandler = async(req, res, next) => {
+  try{
+    const receiverId = req.params.id;
+  const senderId = req.body.senderId;
+  const amount = req.body.amount;
+ 
+  if (senderId === receiverId){
+    return res.status(400).json({ message: "Cannot transfer to the same account" });
+  }
+  const receiver =  await User.findOne({_id: receiverId});
+  const sender = await User.findOne({_id: senderId});
+ 
+  
+  if(!sender){
+    return res.status(400).json({ok:false,message:"sender not found"}) ;
+  }
+  if(!receiver){
+    return res.status(400).json({ok:false,message:"receiver not found"}) ;
+  }
+  let senderBalance = sender.wallet;
+
+  if(senderBalance< amount){
+    return res.status(400).json({ok:false,message:"Insufficient Funds"}) ;
+  } 
+  sender.wallet = Number(sender.wallet)- amount;
+  receiver.wallet = Number(receiver.wallet) + Number(amount);
+  await User.findByIdAndUpdate(
+    sender._id,
+    { wallet: sender.wallet },
+    { new: true }
+  );
+  const data = await User.findByIdAndUpdate(
+    receiver._id,
+    { wallet: receiver.wallet },
+    { new: true }
+  );
+  await sender.save();
+  await receiver.save();
+
+// for sending mail to the receiver's email
+  let email = receiver.email;
+  const transporter = nodemailer.createTransport({
+    host: process.env.NODEMAIL_EMAIL_HOST,
+    port: 587,
+    secure:false,
+    auth: {
+        user: process.env.NODEMAIL_EMAIL,
+        pass: process.env.NODEMAIL_PASS
+    }
+});
+let info = await transporter.sendMail({
+  from: '"Piyush" <piyush@thakur.com>', // sender address
+  to: email, // list of receivers
+  subject: "Money transftered ", // Subject line
+  text: "Money is transfered in your wallet successfully", // plain text body
+  html: "<b>Money is transfered in your wallet successfully</b>", // html body
+});
+
+res.status(200).json({ok:true,message:"money receive successfully"}) ;
+
+  }catch(error){
+    res.status(407).json({ message: error });
+  }
+};
+
