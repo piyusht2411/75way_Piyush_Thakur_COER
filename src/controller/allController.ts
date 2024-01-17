@@ -3,7 +3,24 @@ import { RequestHandler } from 'express';
 import { genSaltSync, hashSync,compareSync } from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { v4 as uuidv4 } from 'uuid';
 import User from '../model/schema';
+import {sendMail} from '../util/emailer'
+
+interface recipentdata{
+  receiverId:string;
+  amount:number;
+  
+}
+const generateUniqueId = ()=>{
+  const v4options = {
+  random: [
+      0x10, 0x91, 0x56, 0xbe, 0xc4, 0xfb, 0xc1, 0xea, 0x71, 0xb4, 0xef, 0xe1, 0x67, 0x1c, 0x58, 0x36,
+  ],
+  };
+  return  uuidv4(v4options);
+}
+
 export const register: RequestHandler = async (req, res, next) => {
   try {
     const { name, email, phone, password, wallet } = req.body;
@@ -136,14 +153,27 @@ export const sendMoney:RequestHandler = async(req, res, next) => {
   } 
   sender.wallet = Number(sender.wallet)- amount;
   receiver.wallet = Number(receiver.wallet) + Number(amount);
+  const sendertransactiondata = {
+    id: generateUniqueId(),
+    amount: amount,
+    timestamp: new Date()
+};
+const receivertransactiondata = {
+    id: generateUniqueId(),
+    amount: amount,
+    timestamp: new Date()
+};
+sender.transition.push(sendertransactiondata);
+      receiver.transition.push(receivertransactiondata);
+
   await User.findByIdAndUpdate(
     sender._id,
-    { wallet: sender.wallet },
+    { wallet: sender.wallet,timeStamp:new Date() },
     { new: true }
   );
   const data = await User.findByIdAndUpdate(
     receiver._id,
-    { wallet: receiver.wallet },
+    { wallet: receiver.wallet,timeStamp:new Date() },
     { new: true }
   );
   await sender.save();
@@ -151,22 +181,23 @@ export const sendMoney:RequestHandler = async(req, res, next) => {
 
 // for sending mail to the receiver's email
   let email = receiver.email;
-  const transporter = nodemailer.createTransport({
-    host: process.env.NODEMAIL_EMAIL_HOST,
-    port: 587,
-    secure:false,
-    auth: {
-        user: process.env.NODEMAIL_EMAIL,
-        pass: process.env.NODEMAIL_PASS
-    }
-});
-let info = await transporter.sendMail({
-  from: '"Piyush" <piyush@thakur.com>', // sender address
-  to: email, // list of receivers
-  subject: "Money transftered ", // Subject line
-  text: "Money is transfered in your wallet successfully", // plain text body
-  html: "<b>Money is transfered in your wallet successfully</b>", // html body
-});
+//   const transporter = nodemailer.createTransport({
+//     host: process.env.NODEMAIL_EMAIL_HOST,
+//     port: 587,
+//     secure:false,
+//     auth: {
+//         user: process.env.NODEMAIL_EMAIL,
+//         pass: process.env.NODEMAIL_PASS
+//     }
+// });
+// let info = await transporter.sendMail({
+//   from: '"Piyush" <piyush@thakur.com>', // sender address
+//   to: email, // list of receivers
+//   subject: "Money transftered ", // Subject line
+//   text: "Money is transfered in your wallet successfully", // plain text body
+//   html: "<b>Money is transfered in your wallet successfully</b>", // html body
+// });
+sendMail(email,"Money trasnfered", "Money transfered in your wallet successfully");
 
 res.status(200).json({ok:true,message:"money sent successfully"}) ;
 
@@ -242,3 +273,54 @@ res.status(200).json({ok:true,message:"money receive successfully"}) ;
   }
 };
 
+// const payment = async (req:Request,res:Response)=>{
+//   const recipent:recipentdata = req.body;
+//   // check if the username and password of the user with id req.id is valid
+//   const user = await User.findById(req.id);
+//   if (!user) {
+//       res.status(400).send('Invalid user ID');
+//       return;
+//   }
+//   // const validPassword = await bcrypt.compare(req.body.password, user.password);
+//   if (password) {
+//       res.status(400).send('Invalid password');
+//       return;
+//   }
+//   const sender = user;
+//   const receiver = await User.findOne({ username: recipent.recipent_username });
+//   if (!sender || !receiver) {
+//       res.status(400).send('Invalid sender or receiver');
+//       return;
+//   }
+//   if (sender.wallet < recipent.transfer_money) {
+//       res.status(400).send('Insufficient balance');
+//       return;
+//   }
+//   try {
+//       sender.wallet -= recipent.transfer_money;
+//       receiver.wallet += recipent.transfer_money;
+//       const sendertransactiondata = {
+//           id: generateUniqueId(),
+//           amount: -recipent.transfer_money,
+//           timestamp: new Date()
+//       };
+//       const receivertransactiondata = {
+//           id: generateUniqueId(),
+//           amount: recipent.transfer_money,
+//           timestamp: new Date()
+//       };
+//       sender.transition.push(sendertransactiondata);
+//       receiver.transition.push(receivertransactiondata);
+//       await sender.save();
+//       await receiver.save();
+//       console.log('payment done');
+//       res.send({
+//           message:"transition successful"
+//       });
+//   } catch (error) {
+//       res.send({
+//           message:"transition failed"
+//       })
+//   }
+// }
+// export {payment};

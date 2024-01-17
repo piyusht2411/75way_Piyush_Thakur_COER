@@ -1,15 +1,6 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-interface User {
-  name: string;
-  email: string;
-  phone: number;
-  password: string;
- wallet:Number
-
-}
-
-const schema = new Schema<User>({
+const schema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -29,10 +20,12 @@ const schema = new Schema<User>({
  
   wallet:{
     type: Number,
-    default: 10
-
+    default: 10,
   },
+  transition:{
+    type:Array
+  }
 }, { timestamps: true });
 
 
-export default model<User>('User', schema)
+export default mongoose.model('User', schema)
