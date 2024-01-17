@@ -10,7 +10,6 @@ router.get('/signout', signout);
 router.post('/signin', signIn);
 router.put('/sendMoney/:id',authenticateToken, sendMoney);
 router.put('/receiveMoney/:id',authenticateToken, receiveMoney);
-
 router.get('/getbalance/:id',authenticateToken, getBalance);
 // router.get('/sendmail', sendMail);
 export default router;
