@@ -29,11 +29,12 @@ app.use((err: Error, req: Request, res:Response, next: NextFunction) => {
   res.status(500).json({message: err.message});  
 });
 
-//database connection
+//database connection function
 const start = async () => {
   try {
     // connectDB
     await db.connectDB(process.env.MONGO_URL!);
+    //server connection port 
     app.listen(PORT, () => console.log(`Server is connected to port : ${PORT}`));
   } catch (error) {
     console.log(error);

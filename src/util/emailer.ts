@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-
+//emailer function for sending mails
 export  const sendMail = (email:String,mailSubject:String,body:String) => {
 
         const mailData:any = {
