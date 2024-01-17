@@ -178,12 +178,12 @@ sender.transition.push(sendertransactiondata);
 // update sender and reciecver's wallet
   await User.findByIdAndUpdate(
     sender._id,
-    { wallet: sender.wallet,timeStamp:new Date() },
+    { wallet: sender.wallet },
     { new: true }
   );
   const data = await User.findByIdAndUpdate(
     receiver._id,
-    { wallet: receiver.wallet,timeStamp:new Date() },
+    { wallet: receiver.wallet },
     { new: true }
   );
   await sender.save();
