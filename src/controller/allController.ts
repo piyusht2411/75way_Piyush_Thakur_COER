@@ -2,6 +2,7 @@ import express, { Express, Request, Response , Application, NextFunction} from '
 import { RequestHandler } from 'express';
 import { genSaltSync, hashSync,compareSync } from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import User from '../model/schema';
 export const register: RequestHandler = async (req, res, next) => {
   try {
@@ -94,7 +95,7 @@ export const getBalance:RequestHandler = async(req, res, next) => {
 
 
   }catch(err){
-    res.send(402).json(err);
+    res.status(407).json({ message: err });
   }
 
 };
@@ -111,19 +112,17 @@ export const signout:RequestHandler = (req, res, next) => {
 };
 
 export const sendMoney:RequestHandler = async(req, res, next) => {
-  const senderId = req.params.id;
+  try{
+    const senderId = req.params.id;
   const receiverId = req.body.receiverId;
   const amount = req.body.amount;
  
   if (senderId === receiverId){
     return res.status(400).json({ message: "Cannot transfer to the same account" });
   }
-
   const sender = await User.findOne({_id: senderId});
   const receiver =  await User.findOne({_id: receiverId});
   
-
-
   if(!sender){
     return res.status(400).json({ok:false,message:"sender not found"}) ;
   }
@@ -149,11 +148,63 @@ export const sendMoney:RequestHandler = async(req, res, next) => {
   );
   await sender.save();
   await receiver.save();
- 
- 
-  res.status(200).json({ok:true,message:"money sent successfully"}) ;
+
+
+  let email = receiver.email;
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure:false,
+    auth: {
+        user: 'maya47@ethereal.email',
+        pass: 'YfmCcZ288fjwekBREv'
+    }
+});
+let info = await transporter.sendMail({
+  from: '"Piyush" <piyush@thakur.com>', // sender address
+  to: email, // list of receivers
+  subject: "Money transftered ", // Subject line
+  text: "Money is transfered in your wallet successfully", // plain text body
+  html: "<b>Money is transfered in your wallet successfully?</b>", // html body
+});
+
+res.status(200).json({ok:true,message:"money sent successfully"}) ;
+
+  }catch(error){
+    res.status(407).json({ message: error });
+  }
+
 
 
 
 };
+
+//nodemailer
+
+// export const sendMail:RequestHandler = async(req, res, next) => {
+
+//   const transporter = nodemailer.createTransport({
+//     host: 'smtp.ethereal.email',
+//     port: 587,
+//     secure:false,
+//     auth: {
+//         user: 'maya47@ethereal.email',
+//         pass: 'YfmCcZ288fjwekBREv'
+//     }
+// });
+
+  
+//       // send mail with defined transport object
+//       let info = await transporter.sendMail({
+//         from: '"Piyush" <piyush@thakur.com>', // sender address
+//         to: "piyush@gmail.com", // list of receivers
+//         subject: "Hello ", // Subject line
+//         text: "Hello bro", // plain text body
+//         html: "<b>Hello world?</b>", // html body
+//       });
+//       res.send('message send');
+  
+  
+
+// };
 

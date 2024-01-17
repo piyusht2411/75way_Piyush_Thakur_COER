@@ -9,5 +9,6 @@ router.get('/signout', signout);
 
 router.post('/signin', signIn);
 router.put('/sendMoney/:id',authenticateToken, sendMoney);
-router.get('/getbalance/:id',authenticateToken, getBalance)
+router.get('/getbalance/:id',authenticateToken, getBalance);
+// router.get('/sendmail', sendMail);
 export default router;
