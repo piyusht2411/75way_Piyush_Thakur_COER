@@ -1,8 +1,6 @@
-import express, { Express, Request, Response , Application, NextFunction} from 'express';
 import { RequestHandler } from 'express';
 import { genSaltSync, hashSync,compareSync } from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from 'uuid';
 import User from '../model/schema';
 import {sendMail} from '../util/emailer'

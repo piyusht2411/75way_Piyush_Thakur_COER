@@ -23,7 +23,8 @@ const schema = new mongoose.Schema({
     default: 10,
   },
   transition:{
-    type:Array
+    type:Array,
+    timestamp:true
   }
 }, { timestamps: true });
 
