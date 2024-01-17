@@ -1,5 +1,7 @@
 import { Request,Response } from "express"
 import User  from '../model/schema';
+// this file is used for getting transition history by applying filters
+
 // for hour filtering
 export const hour = async(req:Request,res:Response)=>{
         try {
