@@ -5,8 +5,8 @@ export const hour = async(req:Request,res:Response)=>{
         try {
             const id = req.params.id;
             const user = await User.findById(id);
-            const hourTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 1 * 60 * 60 * 1000);
-            res.send(hourTransactions);
+            const hourlyTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 1 * 60 * 60 * 1000);
+            res.send(hourlyTransactions);
         } catch (error) {
             res.status(407).json({ message: error });
         }
@@ -27,8 +27,8 @@ export const week = async(req:Request,res:Response)=>{
         try {
             const id = req.params.id;
             const user = await User.findById(id);
-            const weekTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 7 * 24 * 60 * 60 * 1000);
-            res.send(weekTransactions);
+            const weeklyTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 7 * 24 * 60 * 60 * 1000);
+            res.send(weeklyTransactions);
         } catch (error) {
             res.status(407).json({ message: error });
         }
@@ -38,8 +38,8 @@ export const month = async(req:Request,res:Response)=>{
         try {
             const id = req.params.id;
             const user = await User.findById(id);
-            const monthTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 30 * 24 * 60 * 60 * 1000);
-            res.send(monthTransactions);
+            const monthlyTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 30 * 24 * 60 * 60 * 1000);
+            res.send(monthlyTransactions);
         } catch (error) {
             res.status(407).json({ message: error });
         }
@@ -49,8 +49,8 @@ export const year = async(req:Request,res:Response)=>{
         try {
             const id = req.params.id;
             const user = await User.findById(id);
-            const yearTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 365 * 24 * 60 * 60 * 1000);
-            res.send(yearTransactions);
+            const yearlyTransactions = user?.transition.filter(transaction => (Date.now() - new Date(transaction.timestamp).getTime()) <= 365 * 24 * 60 * 60 * 1000);
+            res.send(yearlyTransactions);
         } catch (error) {
             res.status(407).json({ message: error });
         }
