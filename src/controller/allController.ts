@@ -149,15 +149,15 @@ export const sendMoney:RequestHandler = async(req, res, next) => {
   await sender.save();
   await receiver.save();
 
-
+// for sending mail to the receiver's email
   let email = receiver.email;
   const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
+    host: process.env.NODEMAIL_EMAIL_HOST,
     port: 587,
     secure:false,
     auth: {
-        user: 'maya47@ethereal.email',
-        pass: 'YfmCcZ288fjwekBREv'
+        user: process.env.NODEMAIL_EMAIL,
+        pass: process.env.NODEMAIL_PASS
     }
 });
 let info = await transporter.sendMail({
@@ -165,7 +165,7 @@ let info = await transporter.sendMail({
   to: email, // list of receivers
   subject: "Money transftered ", // Subject line
   text: "Money is transfered in your wallet successfully", // plain text body
-  html: "<b>Money is transfered in your wallet successfully?</b>", // html body
+  html: "<b>Money is transfered in your wallet successfully</b>", // html body
 });
 
 res.status(200).json({ok:true,message:"money sent successfully"}) ;
@@ -178,33 +178,3 @@ res.status(200).json({ok:true,message:"money sent successfully"}) ;
 
 
 };
-
-//nodemailer
-
-// export const sendMail:RequestHandler = async(req, res, next) => {
-
-//   const transporter = nodemailer.createTransport({
-//     host: 'smtp.ethereal.email',
-//     port: 587,
-//     secure:false,
-//     auth: {
-//         user: 'maya47@ethereal.email',
-//         pass: 'YfmCcZ288fjwekBREv'
-//     }
-// });
-
-  
-//       // send mail with defined transport object
-//       let info = await transporter.sendMail({
-//         from: '"Piyush" <piyush@thakur.com>', // sender address
-//         to: "piyush@gmail.com", // list of receivers
-//         subject: "Hello ", // Subject line
-//         text: "Hello bro", // plain text body
-//         html: "<b>Hello world?</b>", // html body
-//       });
-//       res.send('message send');
-  
-  
-
-// };
-
